@@ -10,25 +10,32 @@ import 'dart:convert';
 enum Commands {
   requestSession,
   sessionFound,
-  sessionNotAvailable,
+  sessionNotFound,
   text,
+  offerHelp,
+  helpWanted,
+  helpNotWanted,
+  connectToPeer,
+  pipeTest,
 }
 
 class Packets {
-
-  static final List<int> requestSession = [
-    Commands.requestSession.index,
-  ];
 
   static final List<int> sessionFound = [
     Commands.sessionFound.index,
   ];
 
-  static List<int> sendText(String msg) {
-    final packet = [Commands.text.index];
-    packet.addAll(utf8.encode(msg));
-    return packet;
-  }
+  static final List<int> sessionNotFound = [
+    Commands.sessionNotFound.index,
+  ];
+
+  static final List<int> helpWanted = [
+    Commands.helpWanted.index,
+  ];
+
+  static final List<int> helpNotWanted = [
+    Commands.helpNotWanted.index,
+  ];
 
   static Commands command(List<int> packet) {
     return Commands.values[packet[0]];
