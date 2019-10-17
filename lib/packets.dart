@@ -8,10 +8,14 @@
 import 'dart:convert';
 
 enum Commands {
+  unknown,
   requestSession,
   sessionFound,
   sessionNotFound,
   text,
+  imageStart,
+  image,
+  imageStop,
   offerHelp,
   helpWanted,
   helpNotWanted,
@@ -38,6 +42,11 @@ class Packets {
   ];
 
   static Commands command(List<int> packet) {
-    return Commands.values[packet[0]];
+    try {
+      return Commands.values[packet[0]];
+    }
+    on RangeError {
+      return Commands.unknown;
+    }
   }
 }

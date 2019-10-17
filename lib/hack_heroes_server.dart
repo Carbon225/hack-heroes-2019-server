@@ -24,12 +24,15 @@ class AppServer {
   void _onConnection(Socket socket) async {
     print('New connection from ${socket.remoteAddress}');
 
+    bool sendingImage = false;
     Socket peer;
 
     await for (var data in socket) {
       print('Received ${Packets.command(data)}');
 
-      switch (Packets.command(data)) {
+      final Commands command = sendingImage ? Commands.image : Packets.command(data);
+
+      switch (command) {
         case Commands.requestSession:
           final sessionRequest = SessionRequest(socket);
           _userQueue.add(sessionRequest);
@@ -73,17 +76,27 @@ class AppServer {
           break;
 
         case Commands.text:
+        case Commands.imageStart:
+        case Commands.image:
           if (peer == null) {
+            sendingImage = false;
             socket.add(Packets.sessionNotFound);
             break;
           }
 
-          print('Message from ${socket.hashCode} to ${peer.hashCode}');
+          if (command == Commands.imageStart) {
+            sendingImage = true;
+          }
+          else if (data.last == Commands.imageStop.index) {
+            sendingImage = false;
+          }
+          print('${data.length} bytes from ${socket.hashCode} to ${peer.hashCode}');
           peer.add(data);
           break;
 
         case Commands.pipeTest:
           if (peer == null) {
+            sendingImage = false;
             socket.add(Packets.sessionNotFound);
             break;
           }
