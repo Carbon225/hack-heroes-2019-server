@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:hack_heroes_server/HelpRequest.dart';
 import 'package:hack_heroes_server/RequestQueue.dart';
+import 'package:hack_heroes_server/firebase_client.dart';
 
 class AppServer {
   AppServer();
@@ -45,12 +46,14 @@ class AppServer {
         String id;
 
         socket.listen(
-          (data) {
+          (data) async {
             print('${socket.hashCode}: $data');
             if (id == null) {
               id = data;
               _requestQueue.assignSocket(id, socket);
               print('Assigned socket to request');
+
+              await _fcm.broadcast('/topics/helpNeeded', 'Someone needs help', _requestQueue.getRequest(id).text);
             }
           },
           onDone: () {
@@ -179,4 +182,5 @@ class AppServer {
   }
 
   final _requestQueue = RequestQueue();
+  final _fcm = FirebaseClient();
 }
