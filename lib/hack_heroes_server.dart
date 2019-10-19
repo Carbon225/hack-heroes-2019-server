@@ -135,6 +135,9 @@ class AppServer {
             _writeJson(request, {
               'status': 'ok'
             });
+
+            await helpRequest.socket.close();
+            _requestQueue.removeID(helpRequest.id);
           }
           break;
 

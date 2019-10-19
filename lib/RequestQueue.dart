@@ -22,6 +22,7 @@ class RequestQueue {
     // remove old sessions
     Future.delayed(Duration(minutes: 10), () {
       print('Removed old request');
+      request.socket?.close();
       removeID(request.id);
     });
 
