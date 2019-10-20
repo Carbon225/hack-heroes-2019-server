@@ -7,14 +7,17 @@ This is the server application for my project. It allows clients to post help re
 3. [Get your server key](https://stackoverflow.com/questions/37427709/firebase-messaging-where-to-get-server-key)
 4. Put your key in a new file
 5. Modify */lib/firebase_token.dart* <code>File('/run/secrets/firebase_token')</code> with the absolute path to your key
-6. <code>pub get</code>
-7. <code>dart bin/main.dart</code>
+6. Run Dart app
+
+        pub get
+        dart bin/main.dart
 ## Data flow
 1. Client A HTTP POST /getHelp  
     1. Respond to request  
         ***Request***  
 
             {  
+                "id": "firebase id"
                 "text": "some text",  
                 "image": "base64 encoded image"  
             }  
@@ -23,13 +26,9 @@ This is the server application for my project. It allows clients to post help re
             {  
                 "status": "ok",  
                 "placeInQueue": assigned place,  
-                "id": "randomly generated client id"  
             }
     2. Notify helpers with firebase messaging
-2. Client A Websocket -> Server
-    1. Client sends ID from step 1
-    2. Server links the data from step 1 to the websocket
-3. Client B (notified by firebase) HTTP GET /helpNeeded  
+2. Client B (notified by firebase) HTTP GET /helpNeeded  
     ***Response***  
 
             {  
@@ -39,7 +38,7 @@ This is the server application for my project. It allows clients to post help re
                 "text": "null/client A text",  
                 "image: "null/client A image"  
             }
-4. Client B POST /offerHelp  
+3. Client B POST /offerHelp  
     ***Request***  
 
             {  
