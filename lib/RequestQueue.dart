@@ -11,18 +11,9 @@ class RequestQueue {
   int enqueue(HelpRequest request) {
     _queue.addLast(request);
 
-    // remove request if client hasn't connected WS
-    Future.delayed(Duration(seconds: 1), () {
-      if (request.socket == null) {
-        print('Client did not connect WS');
-        removeID(request.id);
-      }
-    });
-
     // remove old sessions
     Future.delayed(Duration(minutes: 10), () {
       print('Removed old request');
-      request.socket?.close();
       removeID(request.id);
     });
 
@@ -40,7 +31,7 @@ class RequestQueue {
 
   HelpRequest get first {
     try {
-      return _queue.firstWhere((e) => e.socket != null);
+      return _queue.first;
     }
     on StateError {
       return null;
@@ -58,11 +49,6 @@ class RequestQueue {
     on StateError {
       return null;
     }
-  }
-
-  void assignSocket(String id, WebSocket socket) {
-    final request = _queue.firstWhere((e) => e.id == id);
-    request.socket = socket;
   }
 
   void removeID(String id) {

@@ -11,7 +11,7 @@ class AppServer {
   static const GetHelpEndpoint = '/getHelp';
   static const OfferHelpEndpoint = '/offerHelp';
   static const HelpNeededEndpoint = '/helpNeeded';
-  static const WebsocketEndpoint = '/ws';
+  static const CancelRequestEndpoint = '/cancelRequest';
 
   Future<void> start(int port) async {
     final server = await HttpServer.bind(InternetAddress.anyIPv4, port);
@@ -40,53 +40,43 @@ class AppServer {
   }
 
   Future<void> _handleRequest(HttpRequest request) async {
-    if (request.uri.path == WebsocketEndpoint) {
-      if (WebSocketTransformer.isUpgradeRequest(request)) {
-        final socket = await WebSocketTransformer.upgrade(request);
-        String id;
-
-        socket.listen(
-          (data) async {
-            print('${socket.hashCode}: $data');
-            if (id == null) {
-              id = data;
-              _requestQueue.assignSocket(id, socket);
-              print('Assigned socket to request');
-
-              await _fcm.broadcast('/topics/helpNeeded', 'Someone needs help', _requestQueue.getRequest(id).text);
-            }
-          },
-          onDone: () {
-            print('WS done');
-            _requestQueue.removeID(id);
-          },
-          onError: (e) {
-            print('WS error $e');
-            _requestQueue.removeID(id);
-          }
-        );
-      }
-      else {
-        print('Invalid websocket');
-        _writeError(request, HttpStatus.badRequest, 'Not a websocket');
-      }
-    }
-    else if (request.uri.path == GetHelpEndpoint) {
+    if (request.uri.path == GetHelpEndpoint) {
       switch (request.method) {
         case 'POST':
           print('POST $GetHelpEndpoint');
 
           final data = jsonDecode(await utf8.decoder.bind(request).join());
+          final id = data['id'].toString();
           final text = data['text'].toString();
           final image = data['image'].toString();
 
-          final helpRequest = HelpRequest(text, image);
+          final helpRequest = HelpRequest(text, image, id);
           final place = _requestQueue.enqueue(helpRequest);
 
           _writeJson(request, {
             'status': 'ok',
             'placeInQueue': place,
-            'id': helpRequest.id
+          });
+          break;
+
+        default:
+          print('Invalid method');
+          _writeError(request, HttpStatus.methodNotAllowed);
+          break;
+      }
+    }
+    else if (request.uri.path == CancelRequestEndpoint) {
+      switch (request.method) {
+        case 'POST':
+          print('POST $CancelRequestEndpoint');
+
+          final data = jsonDecode(await utf8.decoder.bind(request).join());
+          final id = data['id'].toString();
+
+          _requestQueue.removeID(id);
+
+          _writeJson(request, {
+            'status': 'ok',
           });
           break;
 
@@ -134,12 +124,11 @@ class AppServer {
           }
           else {
             print('Sending $text to $id');
-            helpRequest.socket.add(text);
+            await _fcm.broadcast(id, 'Help received', text);
             _writeJson(request, {
               'status': 'ok'
             });
 
-            await helpRequest.socket.close();
             _requestQueue.removeID(helpRequest.id);
           }
           break;

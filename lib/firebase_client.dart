@@ -19,6 +19,15 @@ class FirebaseClient {
       // it publishes the message but fails when parsing the response
       // so we ignore this error
     }
+
+    Future<void> sendResponse(String id, String response) async {
+      final message = Message()
+        ..to = id
+        ..title = 'Help received'
+        ..body = response;
+
+      await _fcm.send(message);
+    }
   }
 
   final FCM _fcm;
