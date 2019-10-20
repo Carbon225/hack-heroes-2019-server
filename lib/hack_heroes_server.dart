@@ -53,6 +53,8 @@ class AppServer {
           final helpRequest = HelpRequest(text, image, id);
           final place = _requestQueue.enqueue(helpRequest);
 
+          await _fcm.broadcast('/topics/helpNeeded', 'Someone needs help', text);
+
           _writeJson(request, {
             'status': 'ok',
             'placeInQueue': place,
