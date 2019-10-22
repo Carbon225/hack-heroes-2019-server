@@ -1,4 +1,7 @@
 # [Hack Heroes 2019](http://hackheroes.pl/)
+Connected projects:
+- [Phone app](https://github.com/Carbon225/hack-heroes-2019-mobile)
+- [Keyboard](https://github.com/Carbon225/hack-heroes-2019-keyboard)
 ## Overview
 This is the server application for my project. It allows clients to post help requests containing text and an image that can later be responded to with a text message.
 ## Instalation
