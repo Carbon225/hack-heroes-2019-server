@@ -5,6 +5,8 @@ Connected projects:
 ## Overview
 This is the server application for my project. It allows clients to post help requests containing text and an image that can later be responded to with a text message.
 ## Instalation
+You do not need to run your own server because the precompiled *.apk* file will connect to my server.  
+If you want to compile the app yourself, proceed with the installation.
 1. Install [Dart](https://dart.dev/)
 2. Setup [Firebase Messaging](https://firebase.google.com) (FCM) for your project
 3. [Get your server key](https://stackoverflow.com/questions/37427709/firebase-messaging-where-to-get-server-key)
